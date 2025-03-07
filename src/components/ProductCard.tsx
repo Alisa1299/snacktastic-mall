@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ShoppingCart, Heart } from "lucide-react";
+import { ShoppingCart, Heart, Upload } from "lucide-react";
 import { Product } from "@/types";
 import { useCart } from "@/context/CartContext";
 import { useState } from "react";
@@ -45,6 +45,40 @@ const ProductCard = ({ product }: ProductCardProps) => {
     });
   };
 
+  const handleImageUpload = () => {
+    // Create a file input element
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = 'image/*';
+    
+    // Handle file selection
+    fileInput.onchange = (e) => {
+      const target = e.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        const file = target.files[0];
+        
+        // Show success message (in a real app, this would upload to backend)
+        toast({
+          title: "Image selected",
+          description: `New image '${file.name}' selected for ${product.name}`,
+          duration: 3000,
+        });
+        
+        // Create a temporary object URL to preview the image
+        const objectUrl = URL.createObjectURL(file);
+        
+        // Find the image element and update its src
+        const productImages = document.querySelectorAll(`img[alt="${product.name}"]`);
+        productImages.forEach(img => {
+          (img as HTMLImageElement).src = objectUrl;
+        });
+      }
+    };
+    
+    // Trigger the file selection dialog
+    fileInput.click();
+  };
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden card-hover">
       <div className="relative">
@@ -72,16 +106,27 @@ const ProductCard = ({ product }: ProductCardProps) => {
           )}
         </div>
         
-        {/* Favorite Button */}
-        <button 
-          onClick={toggleFavorite}
-          className="absolute top-2 right-2 bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors"
-        >
-          <Heart 
-            size={18} 
-            className={isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}
-          />
-        </button>
+        {/* Favorite Button and Edit Button */}
+        <div className="absolute top-2 right-2 flex flex-col gap-2">
+          <button 
+            onClick={toggleFavorite}
+            className="bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors"
+          >
+            <Heart 
+              size={18} 
+              className={isFavorite ? "fill-red-500 text-red-500" : "text-gray-400"}
+            />
+          </button>
+          
+          {/* New Edit Button */}
+          <button 
+            onClick={handleImageUpload}
+            className="bg-white/90 p-1.5 rounded-full shadow-sm hover:bg-white transition-colors"
+            title="Upload new image"
+          >
+            <Upload size={18} className="text-gray-400" />
+          </button>
+        </div>
       </div>
       
       <div className="p-4">
